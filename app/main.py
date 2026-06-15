@@ -170,9 +170,17 @@ async def candidate_status(
 @app.get("/sourcing")
 def sourcing_page(request: Request):
     q = request.query_params
-    filters = {k: q.get(k, "") for k in ("role", "skills", "location", "seniority", "segment")}
+    keys = ("role", "skills", "location", "seniority", "segment", "company")
+    filters = {k: q.get(k, "") for k in keys}
     searches = sourcing.build_searches(**filters) if any(filters.values()) else None
-    context = {"filters": filters, "searches": searches, "segments": [s.value for s in Segment]}
+    context = {
+        "filters": filters,
+        "searches": searches,
+        "segments": [s.value for s in Segment],
+        "companies": sourcing.COMPANIES,
+        "role_presets": sourcing.role_presets(),
+        "company_presets": sourcing.company_presets(),
+    }
     return templates.TemplateResponse(request, "sourcing.html", context)
 
 

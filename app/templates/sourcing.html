@@ -11,9 +11,24 @@
     <h1>Find candidates</h1>
     <p class="sub">Set filters → Setu builds the searches → you review public profiles and paste good ones into <a class="link" href="/dashboard">Quick Add</a>. No scraping.</p>
 
+    <section>
+      <h2>Quick searches</h2>
+      <p class="hint">One click → opens the search on LinkedIn.</p>
+      <div class="chips">
+        {% for p in role_presets %}<a class="chip-link" href="{{ p.linkedin_url }}" target="_blank" rel="noopener">{{ p.label }}</a>{% endfor %}
+      </div>
+      <p class="hint" style="margin:.7rem 0 .3rem">Open to work, by company:</p>
+      <div class="chips">
+        {% for p in company_presets %}<a class="chip-link" href="{{ p.linkedin_url }}" target="_blank" rel="noopener">{{ p.label }}</a>{% endfor %}
+      </div>
+    </section>
+
+    <h2>Custom search</h2>
     <form method="get" action="/sourcing" class="grid-form">
       <label>Role / title<input type="text" name="role" value="{{ filters.role }}" placeholder="Backend Engineer"></label>
       <label>Skills <span class="hint-inline">(comma-separated, OR'd)</span><input type="text" name="skills" value="{{ filters.skills }}" placeholder="Go, PostgreSQL, AWS"></label>
+      <label>Company<input type="text" name="company" value="{{ filters.company }}" placeholder="TCS, Infosys…" list="companies"></label>
+      <datalist id="companies">{% for c in companies %}<option value="{{ c }}">{% endfor %}</datalist>
       <label>Location<input type="text" name="location" value="{{ filters.location }}" placeholder="India"></label>
       <label>Seniority<input type="text" name="seniority" value="{{ filters.seniority }}" placeholder="Senior"></label>
       <label>Segment hook
