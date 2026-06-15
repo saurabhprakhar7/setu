@@ -88,7 +88,7 @@
         <p class="empty">No candidates yet.</p>
       {% else %}
       <table>
-        <thead><tr><th>Name</th><th>Profile</th><th>Skills</th><th>Segment</th><th>Status</th><th></th></tr></thead>
+        <thead><tr><th>Name</th><th>Profile</th><th>Skills</th><th>Segment</th><th>Resume</th><th>Status</th><th></th></tr></thead>
         <tbody>
         {% for c in candidates %}
           <tr>
@@ -98,6 +98,7 @@
             </td>
             <td class="muted">{{ c.skills | join(", ") if c.skills else "—" }}</td>
             <td class="muted">{{ c.segment.value if c.segment else "—" }}</td>
+            <td>{% if c.resume_path %}<a class="link" href="{{ c.resume_path }}" target="_blank" rel="noopener">Resume ↗</a>{% else %}—{% endif %}</td>
             <td>
               <form method="post" action="/candidate/{{ c.id }}/status" class="inline">
                 <select name="status" onchange="this.form.submit()">

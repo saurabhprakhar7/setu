@@ -47,6 +47,8 @@ def to_text(jd: JD, rows: list[Row]) -> str:
         if c.expected_pay is not None:
             meta.append(f"expects {c.expected_pay}")
         lines.append("   " + " · ".join(meta))
+        if c.resume_path:
+            lines.append(f"   Resume: {c.resume_path}")
         lines.append("")
     return "\n".join(lines).strip()
 
