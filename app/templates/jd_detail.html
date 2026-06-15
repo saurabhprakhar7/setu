@@ -24,8 +24,11 @@
       <dt>Source</dt><dd>{{ jd.source or "—" }}</dd>
     </dl>
 
-    <a class="link" href="/jd/{{ jd.id }}/matches">View matches</a>
-    <a class="link" href="/jd/new">Parse another</a>
+    <div class="backlinks">
+      <a class="link" href="/jd/{{ jd.id }}/matches">View matches</a>
+      <a class="link" href="/sourcing?{{ {'role': jd.role, 'skills': jd.stack | join(', '), 'seniority': jd.seniority or '', 'location': jd.location or ''} | urlencode }}">Find candidates on LinkedIn/Google ↗</a>
+      <a class="link" href="/jd/new">Parse another</a>
+    </div>
   </main>
 </body>
 </html>

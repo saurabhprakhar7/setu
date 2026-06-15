@@ -60,6 +60,7 @@
             <td class="actions">
               <a class="link" href="/jd/{{ jd.id }}/matches">Matches</a>
               <a class="link" href="/jd/{{ jd.id }}/shortlist">Shortlist</a>
+              <a class="link" href="/sourcing?{{ {'role': jd.role, 'skills': jd.stack | join(', '), 'seniority': jd.seniority or '', 'location': jd.location or ''} | urlencode }}">Find</a>
               <form method="post" action="/posts" class="inline">
                 <input type="hidden" name="jd_id" value="{{ jd.id }}">
                 <button class="ghost" type="submit">Draft post</button>
