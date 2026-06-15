@@ -57,15 +57,25 @@
 
     <section>
       <h2>Invite message</h2>
-      <p class="hint">A LinkedIn message for the people you find — introduces you and links the opt-in form. Send it manually; Setu never sends.</p>
+      <p class="hint">Tailored to your filters above — introduces you and links the opt-in form. Send it manually; Setu never sends.</p>
+      <form method="post" action="/sourcing/invite">
+        <input type="hidden" name="role" value="{{ filters.role }}">
+        <input type="hidden" name="skills" value="{{ filters.skills }}">
+        <input type="hidden" name="company" value="{{ filters.company }}">
+        <input type="hidden" name="seniority" value="{{ filters.seniority }}">
+        <input type="hidden" name="location" value="{{ filters.location }}">
+        <input type="hidden" name="segment" value="{{ filters.segment }}">
+        <label>Max characters <span class="hint-inline">(optional — e.g. 300 for a connection note)</span>
+          <input type="number" name="max_chars" min="80" value="{{ max_chars or '' }}">
+        </label>
+        <button type="submit">{{ "Draft another" if invite else "Draft invite message" }}</button>
+      </form>
       {% if invite %}
       <textarea class="wa-text post-body" rows="5" readonly>{{ invite }}</textarea>
       <div class="actions">
         <button class="ghost" type="button" onclick="copyBox(this)">Copy</button>
-        <form method="post" action="/sourcing/invite" class="inline"><button class="ghost" type="submit">Draft another</button></form>
+        <span class="muted" style="font-size:.85rem">{{ invite | length }} characters{% if max_chars %} · limit {{ max_chars }}{% endif %}</span>
       </div>
-      {% else %}
-      <form method="post" action="/sourcing/invite"><button type="submit">Draft invite message</button></form>
       {% endif %}
     </section>
 

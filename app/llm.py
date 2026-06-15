@@ -86,10 +86,34 @@ def draft_outreach(candidate: Candidate) -> str:
     return _str(data.get("body")) or ""
 
 
-def draft_form_invite() -> str:
-    """Generic LinkedIn message inviting a sourced prospect to the opt-in form."""
-    body = _str(_loads(complete(_FORM_INVITE_PROMPT)).get("body")) or ""
+def draft_form_invite(role="", skills="", company="", seniority="", segment="", max_chars=None) -> str:
+    """LinkedIn message inviting a sourced prospect to the opt-in form.
+
+    Tailored to the sourcing filters, and optionally constrained to max_chars
+    (which accounts for the opt-in link appended afterwards).
+    """
+    limit = ""
+    if max_chars:
+        budget = max(40, int(max_chars) - len(_optin_suffix()))
+        limit = f"Keep the message strictly under {budget} characters."
+    prompt = _FORM_INVITE_PROMPT.format(
+        context=_invite_context(role, skills, company, seniority, segment), limit=limit
+    )
+    body = _str(_loads(complete(prompt)).get("body")) or ""
     return _append_optin(body)
+
+
+def _invite_context(role, skills, company, seniority, segment) -> str:
+    who = " ".join(x for x in [seniority, role] if x) or "software engineers"
+    bits = [f"You're reaching out to {who}"]
+    if skills:
+        bits.append(f"skilled in {skills}")
+    if company:
+        bits.append(f"associated with {company}")
+    seg = {"active": "who may be open to work", "freelance": "who take freelance/contract work"}.get(segment, "")
+    if seg:
+        bits.append(seg)
+    return ", ".join(bits) + "."
 
 
 def draft_post(jd_or_prompt: "JD | str") -> str:
@@ -109,10 +133,15 @@ def draft_post(jd_or_prompt: "JD | str") -> str:
     return _append_optin(body)
 
 
+def _optin_suffix() -> str:
+    url = os.getenv("OPTIN_URL", "http://localhost:8000/optin")
+    return f"\n\nInterested? Opt in here: {url}" if url else ""
+
+
 def _append_optin(body: str) -> str:
     url = os.getenv("OPTIN_URL", "http://localhost:8000/optin")
     if url and url not in body:
-        body = f"{body}\n\nInterested? Opt in here: {url}"
+        body = f"{body}{_optin_suffix()}"
     return body
 
 
@@ -241,12 +270,12 @@ Return ONLY JSON: {{"body": "<message>"}}
 """
 
 
-_FORM_INVITE_PROMPT = """You are a recruiter writing a SHORT LinkedIn message to a senior
-software engineer you found via search (you haven't spoken before). Briefly introduce
-yourself — you place senior engineers into remote contract roles (3-6 months) — say you may
-have opportunities that fit them, and invite them to share their details via a quick form so
-you can match them to roles. Start with a friendly generic greeting (no specific name).
-2-3 sentences, warm and respectful, no hard sell, no URL or link.
+_FORM_INVITE_PROMPT = """You are a recruiter writing a SHORT LinkedIn message to a software
+engineer you found via search (you haven't spoken before). {context}
+Briefly introduce yourself — you place senior engineers into remote contract roles (3-6
+months) — say you may have opportunities that fit them, and invite them to share their
+details via a quick form so you can match them. Start with a friendly generic greeting (no
+specific name). Warm and respectful, no hard sell, no URL or link. {limit}
 Return ONLY JSON: {{"body": "<message>"}}
 """
 

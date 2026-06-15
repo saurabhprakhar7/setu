@@ -170,7 +170,7 @@ async def candidate_status(
 _SOURCING_KEYS = ("role", "skills", "location", "seniority", "segment", "company")
 
 
-def _sourcing_context(filters: dict, invite=None) -> dict:
+def _sourcing_context(filters: dict, invite=None, max_chars=None) -> dict:
     return {
         "filters": filters,
         "searches": sourcing.build_searches(**filters) if any(filters.values()) else None,
@@ -179,6 +179,7 @@ def _sourcing_context(filters: dict, invite=None) -> dict:
         "role_presets": sourcing.role_presets(),
         "company_presets": sourcing.company_presets(),
         "invite": invite,
+        "max_chars": max_chars,
     }
 
 
@@ -189,13 +190,20 @@ def sourcing_page(request: Request):
 
 
 @app.post("/sourcing/invite")
-def sourcing_invite(request: Request):
+async def sourcing_invite(request: Request):
+    form = await request.form()
+    filters = {k: _text(form, k) or "" for k in _SOURCING_KEYS}
+    max_chars = _int(form, "max_chars")
     try:
-        invite = llm.draft_form_invite()
+        invite = llm.draft_form_invite(
+            role=filters["role"], skills=filters["skills"], company=filters["company"],
+            seniority=filters["seniority"], segment=filters["segment"], max_chars=max_chars,
+        )
     except llm.LLMError as exc:
         invite = f"(Draft unavailable: {exc})"
-    filters = {k: "" for k in _SOURCING_KEYS}
-    return templates.TemplateResponse(request, "sourcing.html", _sourcing_context(filters, invite))
+    return templates.TemplateResponse(
+        request, "sourcing.html", _sourcing_context(filters, invite=invite, max_chars=max_chars)
+    )
 
 
 @app.get("/sourced")
