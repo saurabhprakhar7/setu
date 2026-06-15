@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Setu — Find candidates</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="card wide">
+    <h1>Find candidates</h1>
+    <p class="sub">Set filters → Setu builds the searches → you review public profiles and paste good ones into <a class="link" href="/dashboard">Quick Add</a>. No scraping.</p>
+
+    <form method="get" action="/sourcing" class="grid-form">
+      <label>Role / title<input type="text" name="role" value="{{ filters.role }}" placeholder="Backend Engineer"></label>
+      <label>Skills <span class="hint-inline">(comma-separated, OR'd)</span><input type="text" name="skills" value="{{ filters.skills }}" placeholder="Go, PostgreSQL, AWS"></label>
+      <label>Location<input type="text" name="location" value="{{ filters.location }}" placeholder="India"></label>
+      <label>Seniority<input type="text" name="seniority" value="{{ filters.seniority }}" placeholder="Senior"></label>
+      <label>Segment hook
+        <select name="segment">
+          <option value="">—</option>
+          {% for s in segments %}<option value="{{ s }}" {{ 'selected' if s == filters.segment }}>{{ s }}</option>{% endfor %}
+        </select>
+      </label>
+      <button type="submit">Build searches</button>
+    </form>
+
+    {% if searches %}
+    <section class="optin-share">
+      <h2>X-ray query</h2>
+      <textarea class="wa-text post-body" rows="2" readonly>{{ searches.xray }}</textarea>
+      <div class="share-row" style="margin-top:.6rem">
+        <button class="ghost" type="button" onclick="copyXray(this)">Copy query</button>
+        <a class="btn-link" href="{{ searches.google_url }}" target="_blank" rel="noopener">Search on Google ↗</a>
+        <a class="btn-link" href="{{ searches.linkedin_url }}" target="_blank" rel="noopener">Search on LinkedIn ↗</a>
+      </div>
+    </section>
+    {% endif %}
+
+    <a class="link" href="/dashboard">Back to dashboard</a>
+  </main>
+
+  <script>
+    function copyXray(btn) {
+      const text = btn.closest("section").querySelector(".post-body").value;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = "Copied";
+        setTimeout(() => { btn.textContent = "Copy query"; }, 1500);
+      });
+    }
+  </script>
+</body>
+</html>

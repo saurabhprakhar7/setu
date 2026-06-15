@@ -23,6 +23,7 @@ from app import (
     publishing,
     scheduler,
     shortlist,
+    sourcing,
 )
 from app.db import get_session, init_db
 from app.models import (
@@ -164,6 +165,15 @@ async def candidate_status(
         session.commit()
     nxt = _text(form, "next")
     return RedirectResponse(nxt if nxt and nxt.startswith("/") else "/dashboard", status_code=303)
+
+
+@app.get("/sourcing")
+def sourcing_page(request: Request):
+    q = request.query_params
+    filters = {k: q.get(k, "") for k in ("role", "skills", "location", "seniority", "segment")}
+    searches = sourcing.build_searches(**filters) if any(filters.values()) else None
+    context = {"filters": filters, "searches": searches, "segments": [s.value for s in Segment]}
+    return templates.TemplateResponse(request, "sourcing.html", context)
 
 
 @app.get("/sourced")

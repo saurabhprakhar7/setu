@@ -67,6 +67,7 @@ def _import_rows(rows: list[dict]) -> dict:
                     expected_pay=_int(_find(row, "expected", "pay", "rate")),
                     location=_find(row, "location", "city"),
                     availability=_find(row, "availab"),
+                    resume_path=_find(row, "resume", "cv"),  # Google Drive link from a file-upload question
                     consent=True,
                     consent_date=_timestamp(row),
                     status=CandidateStatus.opted_in,
