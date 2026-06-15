@@ -7,7 +7,8 @@
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <main class="card wide">
+  {% include "_nav.html" %}
+  <main class="page">
     <h1>Find candidates</h1>
     <p class="sub">Set filters → Setu builds the searches → you review public profiles and paste good ones into <a class="link" href="/dashboard">Quick Add</a>. No scraping.</p>
 
@@ -23,8 +24,9 @@
       </div>
     </section>
 
-    <h2>Custom search</h2>
-    <form method="get" action="/sourcing" class="grid-form">
+    <section>
+      <h2>Custom search</h2>
+      <form method="get" action="/sourcing" class="grid-form">
       <label>Role / title<input type="text" name="role" value="{{ filters.role }}" placeholder="Backend Engineer"></label>
       <label>Skills <span class="hint-inline">(comma-separated, OR'd)</span><input type="text" name="skills" value="{{ filters.skills }}" placeholder="Go, PostgreSQL, AWS"></label>
       <label>Company<input type="text" name="company" value="{{ filters.company }}" placeholder="TCS, Infosys…" list="companies"></label>
@@ -38,7 +40,8 @@
         </select>
       </label>
       <button type="submit">Build searches</button>
-    </form>
+      </form>
+    </section>
 
     {% if searches %}
     <section class="optin-share">

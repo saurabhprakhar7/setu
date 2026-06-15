@@ -7,9 +7,10 @@
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <main class="card board">
-    <h1>Setu</h1>
-    <p class="sub">Recruiting pipeline · <a class="link" href="/sourcing">find candidates</a> · <a class="link" href="/posts">LinkedIn posts</a></p>
+  {% include "_nav.html" %}
+  <main class="page">
+    <h1>Dashboard</h1>
+    <p class="sub">Your recruiting pipeline at a glance.</p>
 
     <div class="stats">
       <div class="stat"><span class="num">{{ stats.pool }}</span> in pool</div>
