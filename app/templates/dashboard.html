@@ -19,6 +19,18 @@
 
     {% if notice %}<p class="{{ 'warn' if notice_kind == 'error' else 'ok-note' }}">{{ notice }}</p>{% endif %}
 
+    {% if optin_url %}
+    <section class="optin-share">
+      <h2>Opt-in form</h2>
+      <p class="hint">Share with candidates — they opt in (with consent) and get auto-imported to your pool.</p>
+      <div class="share-row">
+        <input id="optinUrl" class="share-input" type="text" value="{{ optin_url }}" readonly>
+        <button class="ghost" type="button" onclick="copyOptin(this)">Copy</button>
+        <a class="btn-link" href="{{ optin_url }}" target="_blank" rel="noopener">Open form ↗</a>
+      </div>
+    </section>
+    {% endif %}
+
     {% if draft %}
     <section class="draft-box">
       <strong>Draft invite for {{ draft_for }}</strong>
@@ -143,5 +155,15 @@
       </form>
     </section>
   </main>
+
+  <script>
+    function copyOptin(btn) {
+      const url = document.getElementById("optinUrl").value;
+      navigator.clipboard.writeText(url).then(() => {
+        btn.textContent = "Copied";
+        setTimeout(() => { btn.textContent = "Copy"; }, 1500);
+      });
+    }
+  </script>
 </body>
 </html>

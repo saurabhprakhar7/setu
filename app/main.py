@@ -506,6 +506,7 @@ def _render_dashboard(request: Request, session: Session, draft=None, draft_for=
         "notice": notice,
         "notice_kind": notice_kind,
         "google_form_ready": bool(os.getenv("GOOGLE_FORM_CSV_URL")),
+        "optin_url": os.getenv("OPTIN_URL"),
     }
     return templates.TemplateResponse(request, "dashboard.html", context)
 
