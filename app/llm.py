@@ -86,6 +86,12 @@ def draft_outreach(candidate: Candidate) -> str:
     return _str(data.get("body")) or ""
 
 
+def draft_form_invite() -> str:
+    """Generic LinkedIn message inviting a sourced prospect to the opt-in form."""
+    body = _str(_loads(complete(_FORM_INVITE_PROMPT)).get("body")) or ""
+    return _append_optin(body)
+
+
 def draft_post(jd_or_prompt: "JD | str") -> str:
     """Draft a LinkedIn post in the recruiter's brand voice, ending with the opt-in link."""
     if isinstance(jd_or_prompt, JD):
@@ -234,6 +240,15 @@ Keep it to 2-3 sentences, no hard sell, respectful.
 Return ONLY JSON: {{"body": "<message>"}}
 """
 
+
+_FORM_INVITE_PROMPT = """You are a recruiter writing a SHORT LinkedIn message to a senior
+software engineer you found via search (you haven't spoken before). Briefly introduce
+yourself — you place senior engineers into remote contract roles (3-6 months) — say you may
+have opportunities that fit them, and invite them to share their details via a quick form so
+you can match them to roles. Start with a friendly generic greeting (no specific name).
+2-3 sentences, warm and respectful, no hard sell, no URL or link.
+Return ONLY JSON: {{"body": "<message>"}}
+"""
 
 _POST_PROMPT = """Write a LinkedIn post in a warm, professional recruiter brand voice
 (80-120 words) about {topic}. You place senior engineers into remote contract roles

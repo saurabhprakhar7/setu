@@ -45,22 +45,37 @@
       <h2>X-ray query</h2>
       <textarea class="wa-text post-body" rows="2" readonly>{{ searches.xray }}</textarea>
       <div class="share-row" style="margin-top:.6rem">
-        <button class="ghost" type="button" onclick="copyXray(this)">Copy query</button>
+        <button class="ghost" type="button" onclick="copyBox(this)">Copy query</button>
         <a class="btn-link" href="{{ searches.google_url }}" target="_blank" rel="noopener">Search on Google ↗</a>
         <a class="btn-link" href="{{ searches.linkedin_url }}" target="_blank" rel="noopener">Search on LinkedIn ↗</a>
       </div>
     </section>
     {% endif %}
 
+    <section>
+      <h2>Invite message</h2>
+      <p class="hint">A LinkedIn message for the people you find — introduces you and links the opt-in form. Send it manually; Setu never sends.</p>
+      {% if invite %}
+      <textarea class="wa-text post-body" rows="5" readonly>{{ invite }}</textarea>
+      <div class="actions">
+        <button class="ghost" type="button" onclick="copyBox(this)">Copy</button>
+        <form method="post" action="/sourcing/invite" class="inline"><button class="ghost" type="submit">Draft another</button></form>
+      </div>
+      {% else %}
+      <form method="post" action="/sourcing/invite"><button type="submit">Draft invite message</button></form>
+      {% endif %}
+    </section>
+
     <a class="link" href="/dashboard">Back to dashboard</a>
   </main>
 
   <script>
-    function copyXray(btn) {
+    function copyBox(btn) {
       const text = btn.closest("section").querySelector(".post-body").value;
+      const original = btn.textContent;
       navigator.clipboard.writeText(text).then(() => {
         btn.textContent = "Copied";
-        setTimeout(() => { btn.textContent = "Copy query"; }, 1500);
+        setTimeout(() => { btn.textContent = original; }, 1500);
       });
     }
   </script>

@@ -167,21 +167,35 @@ async def candidate_status(
     return RedirectResponse(nxt if nxt and nxt.startswith("/") else "/dashboard", status_code=303)
 
 
-@app.get("/sourcing")
-def sourcing_page(request: Request):
-    q = request.query_params
-    keys = ("role", "skills", "location", "seniority", "segment", "company")
-    filters = {k: q.get(k, "") for k in keys}
-    searches = sourcing.build_searches(**filters) if any(filters.values()) else None
-    context = {
+_SOURCING_KEYS = ("role", "skills", "location", "seniority", "segment", "company")
+
+
+def _sourcing_context(filters: dict, invite=None) -> dict:
+    return {
         "filters": filters,
-        "searches": searches,
+        "searches": sourcing.build_searches(**filters) if any(filters.values()) else None,
         "segments": [s.value for s in Segment],
         "companies": sourcing.COMPANIES,
         "role_presets": sourcing.role_presets(),
         "company_presets": sourcing.company_presets(),
+        "invite": invite,
     }
-    return templates.TemplateResponse(request, "sourcing.html", context)
+
+
+@app.get("/sourcing")
+def sourcing_page(request: Request):
+    filters = {k: request.query_params.get(k, "") for k in _SOURCING_KEYS}
+    return templates.TemplateResponse(request, "sourcing.html", _sourcing_context(filters))
+
+
+@app.post("/sourcing/invite")
+def sourcing_invite(request: Request):
+    try:
+        invite = llm.draft_form_invite()
+    except llm.LLMError as exc:
+        invite = f"(Draft unavailable: {exc})"
+    filters = {k: "" for k in _SOURCING_KEYS}
+    return templates.TemplateResponse(request, "sourcing.html", _sourcing_context(filters, invite))
 
 
 @app.get("/sourced")
