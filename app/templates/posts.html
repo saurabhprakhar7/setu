@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Setu — LinkedIn posts</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="card wide">
+    <h1>LinkedIn posts</h1>
+    <p class="sub">
+      Drafts for your own profile.
+      {% if linkedin_ready %}Review, then Approve to publish.{% else %}LinkedIn not connected — copy &amp; post manually.{% endif %}
+    </p>
+
+    {% if cadence_warning %}<p class="warn">{{ cadence_warning }}</p>{% endif %}
+
+    <section>
+      <h2>Draft a post</h2>
+      <form method="post" action="/posts" class="post-form">
+        <label>From a JD
+          <select name="jd_id">
+            <option value="">—</option>
+            {% for jd in jds %}<option value="{{ jd.id }}">{{ jd.role }}{% if jd.client %} · {{ jd.client }}{% endif %}</option>{% endfor %}
+          </select>
+        </label>
+        <label>…or a topic<input type="text" name="prompt" placeholder="e.g. why senior engineers love contract work"></label>
+        <button type="submit">Draft post</button>
+      </form>
+    </section>
+
+    {% if not posts %}
+      <p class="empty">No posts yet.</p>
+    {% endif %}
+
+    {% for p in posts %}
+    <article class="match">
+      <div class="match-head">
+        <span class="muted">#{{ p.id }} · {{ p.created_at.strftime("%Y-%m-%d") }}</span>
+        <span class="badge {{ p.status.value }}">{{ p.status.value }}</span>
+      </div>
+
+      {% if p.error %}<p class="error">{{ p.error }}</p>{% endif %}
+
+      {% if p.status.value in ["draft", "failed"] %}
+      <form method="post" action="/posts/{{ p.id }}/edit">
+        <textarea class="wa-text post-body" name="body" rows="6">{{ p.body }}</textarea>
+        <div class="actions">
+          <button class="ghost" type="submit">Save edits</button>
+          <button class="ghost" type="button" onclick="copyPost(this)">Copy</button>
+        </div>
+      </form>
+      <div class="actions">
+        {% if linkedin_ready %}
+        <form method="post" action="/posts/{{ p.id }}/publish" class="inline">
+          <button type="submit">{{ "Retry publish" if p.status.value == "failed" else "Approve & publish" }}</button>
+        </form>
+        {% endif %}
+        <form method="post" action="/posts/{{ p.id }}/discard" class="inline">
+          <button class="ghost" type="submit">Discard</button>
+        </form>
+      </div>
+      {% else %}
+      <textarea class="wa-text post-body" rows="6" readonly>{{ p.body }}</textarea>
+      {% if p.linkedin_urn %}<p class="hint">Published · {{ p.linkedin_urn }}</p>{% endif %}
+      <div class="actions">
+        <button class="ghost" type="button" onclick="copyPost(this)">Copy</button>
+        <form method="post" action="/posts/{{ p.id }}/discard" class="inline">
+          <button class="ghost" type="submit">Discard</button>
+        </form>
+      </div>
+      {% endif %}
+    </article>
+    {% endfor %}
+
+    <a class="link" href="/dashboard">Back to dashboard</a>
+  </main>
+
+  <script>
+    function copyPost(btn) {
+      const text = btn.closest("article").querySelector(".post-body").value;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = "Copied";
+        setTimeout(() => { btn.textContent = "Copy"; }, 1500);
+      });
+    }
+  </script>
+</body>
+</html>

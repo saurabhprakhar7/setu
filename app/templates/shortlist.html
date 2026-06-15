@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Setu — Shortlist for {{ jd.role }}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="card wide">
+    <h1>Shortlist — {{ jd.role }}</h1>
+    <p class="sub">{{ rows | length }} qualifying candidate(s){% if jd.client %} for {{ jd.client }}{% endif %}.</p>
+
+    {% if not rows %}
+      <p class="empty">No qualifying candidates yet.</p>
+    {% else %}
+      <label class="wa-label">Paste-ready for the client WhatsApp group
+        <textarea class="wa-text" rows="{{ [rows | length * 4 + 2, 20] | min }}" readonly>{{ text }}</textarea>
+      </label>
+      <a class="link" href="/jd/{{ jd.id }}/shortlist.csv">Download CSV</a>
+    {% endif %}
+
+    <a class="link" href="/jd/{{ jd.id }}/matches">Back to matches</a>
+  </main>
+</body>
+</html>

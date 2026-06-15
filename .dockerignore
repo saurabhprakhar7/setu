@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.db
+.env
+resumes/
+linkedin_token.json
+.git/
+.gitignore
+*.md

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Setu — Sourced invites</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="card wide">
+    <h1>Sourced — draft invites</h1>
+    <p class="sub">{{ candidates | length }} sourced candidate(s). Draft all invites at once, then copy &amp; send each on LinkedIn (Setu never sends).</p>
+
+    {% if not candidates %}
+      <p class="empty">No sourced candidates. Add some from the dashboard (Quick add).</p>
+    {% else %}
+      <form method="post" action="/sourced/invites">
+        <button type="submit">Draft invites for all {{ candidates | length }}</button>
+      </form>
+    {% endif %}
+
+    {% if invites %}
+      {% for inv in invites %}
+      <article class="match">
+        <div class="match-head"><span class="name">{{ inv.name }}</span></div>
+        <textarea class="wa-text post-body" rows="3" readonly>{{ inv.body }}</textarea>
+        <div class="actions">
+          <button class="ghost" type="button" onclick="copyPost(this)">Copy</button>
+          <form method="post" action="/candidate/{{ inv.id }}/status" class="inline">
+            <input type="hidden" name="status" value="contacted">
+            <input type="hidden" name="next" value="/sourced">
+            <button class="ghost" type="submit">Mark contacted</button>
+          </form>
+        </div>
+      </article>
+      {% endfor %}
+    {% endif %}
+
+    <a class="link" href="/dashboard">Back to dashboard</a>
+  </main>
+
+  <script>
+    function copyPost(btn) {
+      const text = btn.closest("article").querySelector(".post-body").value;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = "Copied";
+        setTimeout(() => { btn.textContent = "Copy"; }, 1500);
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Setu — Outreach for {{ jd.role }}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="card wide">
+    <h1>Outreach — {{ jd.role }}</h1>
+    <p class="sub">Emails sent to opted-in matches. WhatsApp drafts are below — send those manually.</p>
+
+    {% if not outcomes %}
+      <p class="empty">No qualifying matches to reach out to.</p>
+    {% endif %}
+
+    {% for o in outcomes %}
+    <article class="match">
+      <div class="match-head">
+        <span class="name">{{ o.name }}</span>
+        <span class="score">{{ o.score }}</span>
+      </div>
+
+      <p class="email-line">
+        Email:
+        <span class="badge {{ o.email_status }}">{{ o.email_status }}</span>
+      </p>
+
+      {% if o.whatsapp_body %}
+      <label class="wa-label">WhatsApp draft (copy &amp; send manually)
+        <textarea class="wa-text" rows="3" readonly>{{ o.whatsapp_body }}</textarea>
+      </label>
+      {% endif %}
+    </article>
+    {% endfor %}
+
+    <a class="link" href="/jd/{{ jd.id }}/shortlist">Compile client shortlist</a>
+    <a class="link" href="/jd/{{ jd.id }}/matches">Back to matches</a>
+  </main>
+</body>
+</html>

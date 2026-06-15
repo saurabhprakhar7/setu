@@ -1,0 +1,26 @@
+# Render Blueprint — deploys Setu as a Docker web service on the free plan.
+# Secrets (DATABASE_URL, GEMINI_API_KEY, ...) are set in the Render dashboard,
+# never committed (sync: false).
+services:
+  - type: web
+    name: setu
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: SCHEDULE_POSTS
+        value: "false"
+      - key: POST_INTERVAL_DAYS
+        value: "3"
+      # --- set these in the dashboard (not in git) ---
+      - key: DATABASE_URL          # Supabase Session pooler, postgresql+psycopg://...
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPTIN_URL             # your Google Form link
+        sync: false
+      - key: GOOGLE_FORM_CSV_URL   # published responses-sheet CSV
+        sync: false

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Setu — Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="card board">
+    <h1>Setu</h1>
+    <p class="sub">Recruiting pipeline · <a class="link" href="/optin">public opt-in form</a> · <a class="link" href="/posts">LinkedIn posts</a></p>
+
+    <div class="stats">
+      <div class="stat"><span class="num">{{ stats.pool }}</span> in pool</div>
+      <div class="stat"><span class="num">{{ stats.opted_in }}</span> opted in</div>
+      <div class="stat"><span class="num">{{ stats.jds }}</span> JDs</div>
+    </div>
+
+    {% if notice %}<p class="{{ 'warn' if notice_kind == 'error' else 'ok-note' }}">{{ notice }}</p>{% endif %}
+
+    {% if draft %}
+    <section class="draft-box">
+      <strong>Draft invite for {{ draft_for }}</strong>
+      <p class="hint">Send manually — Setu never sends on LinkedIn.</p>
+      <textarea class="wa-text" rows="4" readonly>{{ draft }}</textarea>
+    </section>
+    {% endif %}
+
+    <section>
+      <div class="row-between">
+        <h2>JDs</h2>
+        <a class="link" href="/jd/new">+ New JD</a>
+      </div>
+      {% if not jds %}
+        <p class="empty">No JDs yet.</p>
+      {% else %}
+      <table>
+        <thead><tr><th>Role</th><th>Client</th><th>Stack</th><th>Min yrs</th><th></th></tr></thead>
+        <tbody>
+        {% for jd in jds %}
+          <tr>
+            <td>{{ jd.role }}</td>
+            <td>{{ jd.client or "—" }}</td>
+            <td class="muted">{{ jd.stack | join(", ") if jd.stack else "—" }}</td>
+            <td>{{ jd.min_years_experience if jd.min_years_experience is not none else "—" }}</td>
+            <td class="actions">
+              <a class="link" href="/jd/{{ jd.id }}/matches">Matches</a>
+              <a class="link" href="/jd/{{ jd.id }}/shortlist">Shortlist</a>
+              <form method="post" action="/posts" class="inline">
+                <input type="hidden" name="jd_id" value="{{ jd.id }}">
+                <button class="ghost" type="submit">Draft post</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+    </section>
+
+    <section>
+      <div class="row-between">
+        <h2>Pool</h2>
+        <span class="actions">
+          <a class="link" href="/sourced">Draft invites for sourced →</a>
+          {% if google_form_ready %}
+          <form method="post" action="/candidates/import" class="inline">
+            <button class="ghost" type="submit">Import opt-ins from Google Form</button>
+          </form>
+          {% endif %}
+        </span>
+      </div>
+      {% if not candidates %}
+        <p class="empty">No candidates yet.</p>
+      {% else %}
+      <table>
+        <thead><tr><th>Name</th><th>Profile</th><th>Skills</th><th>Segment</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+        {% for c in candidates %}
+          <tr>
+            <td>{{ c.name }}</td>
+            <td class="muted">
+              {{ c.seniority or (c.role_type.value if c.role_type else "—") }}{% if c.years_experience is not none %}, {{ c.years_experience }}y{% endif %}
+            </td>
+            <td class="muted">{{ c.skills | join(", ") if c.skills else "—" }}</td>
+            <td class="muted">{{ c.segment.value if c.segment else "—" }}</td>
+            <td>
+              <form method="post" action="/candidate/{{ c.id }}/status" class="inline">
+                <select name="status" onchange="this.form.submit()">
+                  {% for s in statuses %}<option value="{{ s }}" {{ 'selected' if s == c.status.value }}>{{ s }}</option>{% endfor %}
+                </select>
+              </form>
+            </td>
+            <td class="actions">
+              <form method="post" action="/candidate/{{ c.id }}/draft" class="inline">
+                <button class="ghost" type="submit">Draft invite</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2>Quick add — paste profiles</h2>
+      <p class="hint">Paste one or several profiles (separate people with a blank line). Gemini extracts the fields. Added as <strong>sourced</strong> (no consent) — never auto-messaged until they opt in.</p>
+      <form method="post" action="/candidates/quick-add">
+        <textarea name="text" rows="6" placeholder="Asha Rao — Senior Backend Engineer · Go, PostgreSQL, AWS · 8 yrs · Bangalore&#10;&#10;Vikram S — Frontend (React, TypeScript), 6 years, Pune, open to contract"></textarea>
+        <button type="submit">Parse &amp; add to pool</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Add sourced candidate</h2>
+      <p class="hint">Pull side. Added as <strong>sourced</strong> (no consent) — never auto-messaged until they opt in.</p>
+      <form method="post" action="/candidate" class="grid-form">
+        <label>Name<input type="text" name="name" required></label>
+        <label>Email<input type="email" name="email" required></label>
+        <label>WhatsApp<input type="tel" name="whatsapp"></label>
+        <label>Skills <span class="hint-inline">(comma-separated)</span><input type="text" name="skills"></label>
+        <label>Role type
+          <select name="role_type">
+            <option value="">—</option>
+            {% for r in role_types %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
+          </select>
+        </label>
+        <label>Seniority<input type="text" name="seniority"></label>
+        <label>Years of experience<input type="number" name="years_experience" min="0"></label>
+        <label>Segment
+          <select name="segment">
+            <option value="">—</option>
+            {% for s in segments %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+          </select>
+        </label>
+        <label>Expected pay<input type="number" name="expected_pay" min="0"></label>
+        <label>Location<input type="text" name="location"></label>
+        <label>Availability<input type="text" name="availability"></label>
+        <label class="checkbox"><input type="checkbox" name="remote_ok" checked> Open to remote</label>
+        <button type="submit">Add to pool</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

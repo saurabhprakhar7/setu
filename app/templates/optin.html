@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Setu — Join the talent pool</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="card">
+    <h1>Join the Setu talent pool</h1>
+    <p class="sub">Senior engineers, remote contract roles. Opt in once — we reach out only when a role genuinely matches.</p>
+
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+    <form method="post" action="/optin" enctype="multipart/form-data">
+      <label>Full name<input type="text" name="name" required></label>
+      <label>Email<input type="email" name="email" required></label>
+      <label>WhatsApp<input type="tel" name="whatsapp" placeholder="+91…"></label>
+
+      <label>Skills<input type="text" name="skills" placeholder="React, Node, AWS"></label>
+      <span class="hint">Comma-separated.</span>
+
+      <label>Role type
+        <select name="role_type">
+          <option value="">—</option>
+          {% for r in role_types %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
+        </select>
+      </label>
+
+      <label>Seniority<input type="text" name="seniority" placeholder="Senior, Staff…"></label>
+      <label>Years of experience<input type="number" name="years_experience" min="0"></label>
+
+      <label>Segment
+        <select name="segment">
+          <option value="">—</option>
+          {% for s in segments %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+        </select>
+      </label>
+
+      <label>Current pay (₹/month)<input type="number" name="current_pay" min="0"></label>
+      <label>Expected pay (₹/month)<input type="number" name="expected_pay" min="0"></label>
+      <label>Location<input type="text" name="location"></label>
+
+      <label class="checkbox"><input type="checkbox" name="remote_ok" checked> Open to remote</label>
+
+      <label>Availability<input type="text" name="availability" placeholder="Immediate, 2 weeks…"></label>
+      <label>Resume<input type="file" name="resume" accept=".pdf,.doc,.docx"></label>
+
+      <label class="checkbox"><input type="checkbox" name="consent" required> I consent to Setu storing my details and contacting me about relevant roles.</label>
+
+      <button type="submit">Join the pool</button>
+    </form>
+  </main>
+</body>
+</html>

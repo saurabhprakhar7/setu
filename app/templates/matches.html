@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Setu — Matches for {{ jd.role }}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="card wide">
+    <h1>Matches — {{ jd.role }}</h1>
+    <p class="sub">
+      JD #{{ jd.id }} · requires
+      {{ jd.min_years_experience if jd.min_years_experience is not none else "any" }}+ yrs ·
+      {{ jd.stack | join(", ") if jd.stack else "no stack listed" }}
+    </p>
+
+    {% if not results %}
+      <p class="empty">No opted-in candidates in the pool yet.</p>
+    {% else %}
+      <form method="post" action="/jd/{{ jd.id }}/outreach">
+        <button type="submit">Email qualifying matches &amp; draft WhatsApp</button>
+      </form>
+      <a class="link" href="/jd/{{ jd.id }}/shortlist">Compile client shortlist</a>
+    {% endif %}
+
+    {% for r in results %}
+    <article class="match {{ 'dim' if not r.experience_ok }}">
+      <div class="match-head">
+        <span class="name">{{ r.name }}</span>
+        <span class="score">{{ r.score }}</span>
+      </div>
+
+      <div class="skills">
+        {% for s in r.matched_skills %}<span class="chip ok">{{ s }}</span>{% endfor %}
+        {% for s in r.missing_skills %}<span class="chip miss">{{ s }}</span>{% endfor %}
+      </div>
+
+      <ul class="flags">
+        <li class="{{ 'yes' if r.experience_ok else 'no' }}">
+          Experience: {{ r.years_experience if r.years_experience is not none else "unknown" }} yrs
+          {% if r.required_min is not none %}/ needs {{ r.required_min }}+{% endif %}
+        </li>
+        <li class="{{ 'yes' if r.seniority_ok else 'no' }}">Seniority</li>
+        <li class="{{ 'yes' if r.remote_ok else 'no' }}">Remote/location</li>
+        <li class="{{ 'yes' if r.pay_ok else 'no' }}">Pay fit</li>
+      </ul>
+    </article>
+    {% endfor %}
+
+    <a class="link" href="/jd/new">Parse another JD</a>
+  </main>
+</body>
+</html>

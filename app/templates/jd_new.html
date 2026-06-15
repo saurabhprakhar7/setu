@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Setu — New JD</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="card">
+    <h1>Paste a job description</h1>
+    <p class="sub">Setu parses it locally into structured fields and saves it.</p>
+
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+    <form method="post" action="/jd">
+      <label>Job description<textarea name="jd_text" rows="14" required></textarea></label>
+      <label>Client <span class="hint-inline">(optional, overrides parsed)</span><input type="text" name="client"></label>
+      <label>Source <span class="hint-inline">(optional)</span><input type="text" name="source" placeholder="email, referral…"></label>
+      <button type="submit">Parse &amp; save</button>
+    </form>
+  </main>
+</body>
+</html>

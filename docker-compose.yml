@@ -1,0 +1,14 @@
+services:
+  web:
+    build: .
+    env_file: .env          # DATABASE_URL points at Supabase (same DB as Render)
+    environment:
+      RESUMES_DIR: /app/data/resumes
+      LINKEDIN_TOKEN_STORE: /app/data/linkedin_token.json
+    ports:
+      - "8000:8000"
+    volumes:
+      - setu_data:/app/data
+
+volumes:
+  setu_data:

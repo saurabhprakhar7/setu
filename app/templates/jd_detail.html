@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Setu — {{ jd.role }}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="card">
+    <h1>{{ jd.role }}</h1>
+    <p class="sub">Parsed and saved (JD #{{ jd.id }}).</p>
+
+    <dl class="detail">
+      <dt>Stack</dt><dd>{{ jd.stack | join(", ") if jd.stack else "—" }}</dd>
+      <dt>Experience</dt><dd>{{ jd.min_years_experience if jd.min_years_experience is not none else "—" }}–{{ jd.max_years_experience if jd.max_years_experience is not none else "—" }} yrs</dd>
+      <dt>Seniority</dt><dd>{{ jd.seniority or "—" }}</dd>
+      <dt>Location</dt><dd>{{ jd.location or "—" }}</dd>
+      <dt>Remote</dt><dd>{{ "Yes" if jd.remote else "No" }}</dd>
+      <dt>Duration</dt><dd>{{ jd.contract_duration or "—" }}</dd>
+      <dt>Rate</dt><dd>{{ jd.rate if jd.rate is not none else "—" }}</dd>
+      <dt>Client</dt><dd>{{ jd.client or "—" }}</dd>
+      <dt>Source</dt><dd>{{ jd.source or "—" }}</dd>
+    </dl>
+
+    <a class="link" href="/jd/{{ jd.id }}/matches">View matches</a>
+    <a class="link" href="/jd/new">Parse another</a>
+  </main>
+</body>
+</html>
