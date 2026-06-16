@@ -301,9 +301,9 @@ def _loads(raw: str) -> dict:
     raise LLMError(f"LLM did not return valid JSON: {raw[:200]!r}")
 
 
-_CANDIDATES_PROMPT = """Extract software-engineering candidate profiles from the text below.
-It may contain one person or several (often separated by blank lines). For EACH person
-return an object with these keys:
+_CANDIDATES_PROMPT = """Extract candidate profiles (any professional or tech role — e.g.
+engineer, data analyst, designer, PM) from the text below. It may be a LinkedIn headline,
+a résumé, or one or several profiles. For EACH person return an object with these keys:
 - name: full name (string)
 - email: (string) or null
 - whatsapp: phone number (string) or null
