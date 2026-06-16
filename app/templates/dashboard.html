@@ -93,7 +93,11 @@
         <tbody>
         {% for c in candidates %}
           <tr>
-            <td>{{ c.name }}</td>
+            <td>
+              {{ c.name }}
+              {% if c.email %}<div class="contact">{{ c.email }}</div>{% endif %}
+              {% if c.whatsapp %}<div class="contact">{{ c.whatsapp }}</div>{% endif %}
+            </td>
             <td class="muted">
               {{ c.seniority or (c.role_type.value if c.role_type else "—") }}{% if c.years_experience is not none %}, {{ c.years_experience }}y{% endif %}
             </td>

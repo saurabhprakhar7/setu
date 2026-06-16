@@ -133,6 +133,7 @@ table { width: 100%; border-collapse: collapse; font-size: .9rem; }
 th, td { text-align: left; padding: .5rem .4rem; border-bottom: 1px solid var(--border); vertical-align: top; }
 th { color: var(--muted); font-weight: 600; }
 td.actions { white-space: nowrap; }
+.contact { font-size: .8rem; color: var(--muted); }
 td.actions .link { margin-right: .6rem; }
 
 /* trailing nav links on simple pages */
