@@ -25,40 +25,45 @@ _ROLE_PRESETS = [
 ]
 
 
+def _quote_skill(s: str) -> str:
+    return f'"{s}"' if " " in s else s
+
+
 def build_searches(role="", skills="", location="", seniority="", segment="", company="", min_years="") -> dict:
     skill_list = [s.strip() for s in skills.split(",") if s.strip()]
 
-    terms = []
+    # X-ray: keep lean — only terms that appear in profile text.
+    # Company and min_years are too restrictive in a Boolean AND chain; they go into LinkedIn keywords instead.
+    xray_terms = []
     if role.strip():
-        terms.append(f'"{role.strip()}"')
+        xray_terms.append(f'"{role.strip()}"')
     if skill_list:
-        terms.append("(" + " OR ".join(skill_list) + ")")
+        xray_terms.append("(" + " OR ".join(_quote_skill(s) for s in skill_list) + ")")
     if seniority.strip():
-        terms.append(f'"{seniority.strip()}"')
-    if company.strip():
-        terms.append(f'"{company.strip()}"')
+        xray_terms.append(f'"{seniority.strip()}"')
     if location.strip():
-        terms.append(location.strip())
-    if min_years:
-        try:
-            n = int(min_years)
-            year_terms = " OR ".join(f'"{y} year' for y in range(n, n + 6))
-            terms.append(f"({year_terms})")
-        except ValueError:
-            pass
+        xray_terms.append(location.strip())
     hook = _SEGMENT_HOOKS.get(segment, "")
     if hook:
-        terms.append(hook)
+        xray_terms.append(hook)
 
-    xray = " ".join(["site:linkedin.com/in", *terms, "-intitle:jobs"])
-    keywords = " ".join(
-        t for t in [role, " ".join(skill_list), seniority, company, location] if t.strip()
-    )
+    xray = " ".join(["site:linkedin.com/in", *xray_terms, "-intitle:jobs"])
+
+    # LinkedIn keyword search: include everything so LinkedIn's ranking surfaces the best matches.
+    kw_parts = [role, " ".join(skill_list), seniority, company, location]
+    if min_years:
+        try:
+            kw_parts.append(f"{int(min_years)}+ years")
+        except ValueError:
+            pass
+    keywords = " ".join(t for t in kw_parts if t.strip())
+
     return {
         "xray": xray,
         "google_url": "https://www.google.com/search?q=" + urllib.parse.quote(xray),
         "linkedin_url": "https://www.linkedin.com/search/results/people/?keywords="
-        + urllib.parse.quote(keywords),
+        + urllib.parse.quote(keywords)
+        + "&origin=GLOBAL_SEARCH_HEADER",
     }
 
 
