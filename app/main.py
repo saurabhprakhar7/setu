@@ -36,6 +36,7 @@ from app.models import (
     Post,
     PostStatus,
     RoleType,
+    SavedSearch,
     Segment,
 )
 from app.storage import save_resume
@@ -167,10 +168,11 @@ async def candidate_status(
     return RedirectResponse(nxt if nxt and nxt.startswith("/") else "/dashboard", status_code=303)
 
 
-_SOURCING_KEYS = ("role", "skills", "location", "seniority", "segment", "company")
+_SOURCING_KEYS = ("role", "skills", "location", "seniority", "segment", "company", "min_years")
 
 
-def _sourcing_context(filters: dict, invite=None, max_chars=None) -> dict:
+def _sourcing_context(filters: dict, invite=None, max_chars=None, session: Session | None = None) -> dict:
+    saved = session.exec(select(SavedSearch).order_by(SavedSearch.id)).all() if session else []
     return {
         "filters": filters,
         "searches": sourcing.build_searches(**filters) if any(filters.values()) else None,
@@ -178,32 +180,54 @@ def _sourcing_context(filters: dict, invite=None, max_chars=None) -> dict:
         "companies": sourcing.COMPANIES,
         "role_presets": sourcing.role_presets(),
         "company_presets": sourcing.company_presets(),
+        "saved_searches": saved,
         "invite": invite,
         "max_chars": max_chars,
     }
 
 
 @app.get("/sourcing")
-def sourcing_page(request: Request):
+def sourcing_page(request: Request, session: Session = Depends(get_session)):
     filters = {k: request.query_params.get(k, "") for k in _SOURCING_KEYS}
-    return templates.TemplateResponse(request, "sourcing.html", _sourcing_context(filters))
+    return templates.TemplateResponse(request, "sourcing.html", _sourcing_context(filters, session=session))
 
 
 @app.post("/sourcing/invite")
-async def sourcing_invite(request: Request):
+async def sourcing_invite(request: Request, session: Session = Depends(get_session)):
     form = await request.form()
     filters = {k: _text(form, k) or "" for k in _SOURCING_KEYS}
     max_chars = _int(form, "max_chars")
     try:
         invite = llm.draft_form_invite(
             role=filters["role"], skills=filters["skills"], company=filters["company"],
-            seniority=filters["seniority"], segment=filters["segment"], max_chars=max_chars,
+            seniority=filters["seniority"], segment=filters["segment"],
+            min_years=filters["min_years"], max_chars=max_chars,
         )
     except llm.LLMError as exc:
         invite = f"(Draft unavailable: {exc})"
     return templates.TemplateResponse(
-        request, "sourcing.html", _sourcing_context(filters, invite=invite, max_chars=max_chars)
+        request, "sourcing.html", _sourcing_context(filters, invite=invite, max_chars=max_chars, session=session)
     )
+
+
+@app.post("/sourcing/save")
+async def sourcing_save(request: Request, session: Session = Depends(get_session)):
+    form = await request.form()
+    filters = {k: _text(form, k) or "" for k in _SOURCING_KEYS}
+    label = _text(form, "label") or " · ".join(v for v in filters.values() if v) or "Custom search"
+    session.add(SavedSearch(label=label, **filters))
+    session.commit()
+    params = "&".join(f"{k}={v}" for k, v in filters.items() if v)
+    return RedirectResponse(f"/sourcing?{params}", status_code=303)
+
+
+@app.post("/sourcing/saved/{search_id}/delete")
+def sourcing_saved_delete(search_id: int, session: Session = Depends(get_session)):
+    row = session.get(SavedSearch, search_id)
+    if row:
+        session.delete(row)
+        session.commit()
+    return RedirectResponse("/sourcing", status_code=303)
 
 
 @app.get("/sourced")

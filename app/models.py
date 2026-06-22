@@ -89,6 +89,18 @@ class Message(SQLModel, table=True):
     sent_at: datetime | None = None
 
 
+class SavedSearch(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    label: str
+    role: str = ""
+    skills: str = ""
+    location: str = ""
+    seniority: str = ""
+    segment: str = ""
+    company: str = ""
+    min_years: str = ""
+
+
 class PostStatus(str, Enum):
     draft = "draft"
     approved = "approved"

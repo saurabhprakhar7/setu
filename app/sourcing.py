@@ -25,7 +25,7 @@ _ROLE_PRESETS = [
 ]
 
 
-def build_searches(role="", skills="", location="", seniority="", segment="", company="") -> dict:
+def build_searches(role="", skills="", location="", seniority="", segment="", company="", min_years="") -> dict:
     skill_list = [s.strip() for s in skills.split(",") if s.strip()]
 
     terms = []
@@ -39,6 +39,13 @@ def build_searches(role="", skills="", location="", seniority="", segment="", co
         terms.append(f'"{company.strip()}"')
     if location.strip():
         terms.append(location.strip())
+    if min_years:
+        try:
+            n = int(min_years)
+            year_terms = " OR ".join(f'"{y} year' for y in range(n, n + 6))
+            terms.append(f"({year_terms})")
+        except ValueError:
+            pass
     hook = _SEGMENT_HOOKS.get(segment, "")
     if hook:
         terms.append(hook)

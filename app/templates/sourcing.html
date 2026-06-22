@@ -22,24 +22,43 @@
       <div class="chips">
         {% for p in company_presets %}<a class="chip-link" href="{{ p.linkedin_url }}" target="_blank" rel="noopener">{{ p.label }}</a>{% endfor %}
       </div>
+      {% if saved_searches %}
+      <p class="hint" style="margin:.7rem 0 .3rem">Saved searches:</p>
+      <div class="chips">
+        {% for s in saved_searches %}
+        <span class="chip-saved">
+          <a class="chip-link" href="/sourcing?role={{ s.role }}&skills={{ s.skills }}&location={{ s.location }}&seniority={{ s.seniority }}&segment={{ s.segment }}&company={{ s.company }}&min_years={{ s.min_years }}">{{ s.label }}</a>
+          <form method="post" action="/sourcing/saved/{{ s.id }}/delete" style="display:inline">
+            <button type="submit" class="chip-delete" title="Remove">×</button>
+          </form>
+        </span>
+        {% endfor %}
+      </div>
+      {% endif %}
     </section>
 
     <section>
       <h2>Custom search</h2>
-      <form method="get" action="/sourcing" class="grid-form">
+      <form method="get" action="/sourcing" class="grid-form" id="search-form">
       <label>Role / title<input type="text" name="role" value="{{ filters.role }}" placeholder="Backend Engineer"></label>
       <label>Skills <span class="hint-inline">(comma-separated, OR'd)</span><input type="text" name="skills" value="{{ filters.skills }}" placeholder="Go, PostgreSQL, AWS"></label>
       <label>Company<input type="text" name="company" value="{{ filters.company }}" placeholder="TCS, Infosys…" list="companies"></label>
       <datalist id="companies">{% for c in companies %}<option value="{{ c }}">{% endfor %}</datalist>
       <label>Location<input type="text" name="location" value="{{ filters.location }}" placeholder="India"></label>
       <label>Seniority<input type="text" name="seniority" value="{{ filters.seniority }}" placeholder="Senior"></label>
+      <label>Min. years experience<input type="number" name="min_years" value="{{ filters.min_years }}" placeholder="5" min="0" max="30"></label>
       <label>Segment hook
         <select name="segment">
           <option value="">—</option>
           {% for s in segments %}<option value="{{ s }}" {{ 'selected' if s == filters.segment }}>{{ s }}</option>{% endfor %}
         </select>
       </label>
-      <button type="submit">Build searches</button>
+      <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
+        <button type="submit">Build searches</button>
+        {% if searches %}
+        <button type="button" class="ghost" onclick="openSaveDialog()">+ Add to Quick Search</button>
+        {% endif %}
+      </div>
       </form>
     </section>
 
@@ -65,6 +84,7 @@
         <input type="hidden" name="seniority" value="{{ filters.seniority }}">
         <input type="hidden" name="location" value="{{ filters.location }}">
         <input type="hidden" name="segment" value="{{ filters.segment }}">
+        <input type="hidden" name="min_years" value="{{ filters.min_years }}">
         <label>Max characters <span class="hint-inline">(optional — e.g. 300 for a connection note)</span>
           <input type="number" name="max_chars" min="80" value="{{ max_chars or '' }}">
         </label>
@@ -82,6 +102,29 @@
     <a class="link" href="/dashboard">Back to dashboard</a>
   </main>
 
+  <!-- Save search dialog -->
+  <dialog id="save-dialog" style="padding:1.4rem;border-radius:8px;border:1px solid var(--border,#ddd);min-width:300px">
+    <form method="post" action="/sourcing/save">
+      <input type="hidden" name="role" value="{{ filters.role }}">
+      <input type="hidden" name="skills" value="{{ filters.skills }}">
+      <input type="hidden" name="company" value="{{ filters.company }}">
+      <input type="hidden" name="seniority" value="{{ filters.seniority }}">
+      <input type="hidden" name="location" value="{{ filters.location }}">
+      <input type="hidden" name="segment" value="{{ filters.segment }}">
+      <input type="hidden" name="min_years" value="{{ filters.min_years }}">
+      <label style="display:block;margin-bottom:.8rem">
+        Label for this search
+        <input type="text" name="label" required autofocus
+          value="{{ [filters.role, filters.seniority, filters.skills] | select | join(' · ') or 'Custom search' }}"
+          style="display:block;width:100%;margin-top:.3rem">
+      </label>
+      <div style="display:flex;gap:.6rem;justify-content:flex-end">
+        <button type="button" class="ghost" onclick="document.getElementById('save-dialog').close()">Cancel</button>
+        <button type="submit">Save</button>
+      </div>
+    </form>
+  </dialog>
+
   <script>
     function copyBox(btn) {
       const text = btn.closest("section").querySelector(".post-body").value;
@@ -91,6 +134,20 @@
         setTimeout(() => { btn.textContent = original; }, 1500);
       });
     }
+
+    function openSaveDialog() {
+      document.getElementById("save-dialog").showModal();
+    }
   </script>
+
+  <style>
+    .chip-saved { display:inline-flex; align-items:center; gap:0; }
+    .chip-delete {
+      background:none; border:none; cursor:pointer;
+      color:var(--muted,#888); font-size:1rem; padding:0 .3rem;
+      line-height:1;
+    }
+    .chip-delete:hover { color:#c00; }
+  </style>
 </body>
 </html>

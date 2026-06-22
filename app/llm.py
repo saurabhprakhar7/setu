@@ -86,7 +86,7 @@ def draft_outreach(candidate: Candidate) -> str:
     return _str(data.get("body")) or ""
 
 
-def draft_form_invite(role="", skills="", company="", seniority="", segment="", max_chars=None) -> str:
+def draft_form_invite(role="", skills="", company="", seniority="", segment="", min_years="", max_chars=None) -> str:
     """LinkedIn message inviting a sourced prospect to the opt-in form.
 
     Tailored to the sourcing filters, and optionally constrained to max_chars
@@ -97,15 +97,17 @@ def draft_form_invite(role="", skills="", company="", seniority="", segment="", 
         budget = max(40, int(max_chars) - len(_optin_suffix()))
         limit = f"Keep the message strictly under {budget} characters."
     prompt = _FORM_INVITE_PROMPT.format(
-        context=_invite_context(role, skills, company, seniority, segment), limit=limit
+        context=_invite_context(role, skills, company, seniority, segment, min_years), limit=limit
     )
     body = _str(_loads(complete(prompt)).get("body")) or ""
     return _append_optin(body)
 
 
-def _invite_context(role, skills, company, seniority, segment) -> str:
+def _invite_context(role, skills, company, seniority, segment, min_years="") -> str:
     who = " ".join(x for x in [seniority, role] if x) or "software engineers"
     bits = [f"You're reaching out to {who}"]
+    if min_years:
+        bits.append(f"with {min_years}+ years of experience")
     if skills:
         bits.append(f"skilled in {skills}")
     if company:
